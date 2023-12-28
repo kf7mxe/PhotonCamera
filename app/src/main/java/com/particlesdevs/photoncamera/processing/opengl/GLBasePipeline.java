@@ -50,17 +50,34 @@ public class GLBasePipeline implements AutoCloseable {
     public GLBasePipeline(){
         Properties properties = new Properties();
         try {
-            File init = new File(sPHOTON_TUNING_DIR, "PhotonCameraTuning.ini");
-            if(!init.exists()) {
-                init.createNewFile();
-                /*InputStream inputStream = PhotonCamera.getAssetLoader().getInputStream("tuning/PhotonCameraTuning.ini");
+
+            // check if the api level has scoped storage
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                // if it does, then we need to copy the tuning files to the app's private storage
+                // so that we can access them
+
+                // create scoped file
+                File scopedFile = new File("PhotonCameraTuning.ini");
+                if(!scopedFile.exists())  {
+                    scopedFile.createNewFile();
+                } else {
+                    // if the file already exists, then we don't need to copy it again
+                    // so we can just load it
+                    properties.load(new FileInputStream(scopedFile));
+                }
+            } else {
+                File init = new File(sPHOTON_TUNING_DIR, "PhotonCameraTuning.ini");
+                if (!init.exists()) {
+                    init.createNewFile();
+                /*InputStream inputStream = PhotonCamera.getAssetLoader().getInputStream("tuning/PhotonCameraTuningF.ini");
                 byte[] buffer = new byte[inputStream.available()];
                 inputStream.read(buffer);
                 OutputStream outputStream = new FileOutputStream(init);
                 outputStream.write(buffer);
                 outputStream.close();*/
+                }
+                properties.load(new FileInputStream(init));
             }
-            properties.load(new FileInputStream(init));
         } catch (Exception e) {
             Log.e("PostPipeline","Error at loading properties");
             e.printStackTrace();

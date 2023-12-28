@@ -1,6 +1,11 @@
 package com.particlesdevs.photoncamera.util;
 
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -29,11 +34,45 @@ public class FileManager {
     public static List<File> tempImageFiles;
 
 
+    public void saveFileUsingMediaStore(Context context, String displayName, String mimeType, String relativePath, byte[] data) {
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Images.Media.DISPLAY_NAME, displayName);
+        values.put(MediaStore.Images.Media.MIME_TYPE, mimeType);
+        values.put(MediaStore.Images.Media.RELATIVE_PATH, "DCIM/"+relativePath);
+        Uri uri = context.getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+        try {
+            context.getContentResolver().openOutputStream(uri).write(data);
+        } catch (Exception e) {
+            Log.e(TAG, "saveFileUsingMediaStore: ", e);
+        }
+    }
+
+    public ArrayList<String> readFileUsingMediaStore(Context context, String relativePath) {
+        String[] projection = {MediaStore.Images.Media.DATA};
+        String selection = MediaStore.Images.Media.RELATIVE_PATH + " = ?";
+        String[] selectionArgs = {"DCIM/" + relativePath};
+        Cursor cursor = context.getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection, selection, selectionArgs, null);
+
+        ArrayList<String> imageUris = new ArrayList<>();
+        if (cursor != null) {
+            while (cursor.moveToNext()) {
+                int columnIndex = cursor.getColumnIndex(MediaStore.Images.Media.DATA);
+                String imageUri = cursor.getString(columnIndex);
+                imageUris.add(imageUri);
+            }
+            cursor.close();
+        }
+        return imageUris;
+    }
+
+
     public static void CreateFolders() {
         Log.d(TAG, "CreatedFolder : " + sDCIM_CAMERA + '=' + sDCIM_CAMERA.mkdirs());
         Log.d(TAG, "CreatedFolder : " + sPHOTON_RAW_DIR + '=' + sPHOTON_RAW_DIR.mkdirs());
         Log.d(TAG, "CreatedFolder : " + sPHOTON_TUNING_DIR + '=' + sPHOTON_TUNING_DIR.mkdirs());
     }
+
+
 
     public static void ScanRemovedFile(File f){
         long fileTime = f.lastModified();

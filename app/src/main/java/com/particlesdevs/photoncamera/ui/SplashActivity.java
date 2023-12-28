@@ -1,6 +1,7 @@
 package com.particlesdevs.photoncamera.ui;
 
 import android.annotation.SuppressLint;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -17,6 +18,11 @@ public class SplashActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         try {
+
+//            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
+//                File scopedFile
+//            }
+
             final File path = new File(
                     FileManager.sPHOTON_DIR, "PhotonLog");
             if (!path.exists()) {

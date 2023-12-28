@@ -37,7 +37,6 @@ public class CameraActivity extends BaseActivity {
 
     private static final int CODE_REQUEST_PERMISSIONS = 1;
     private static final String[] PERMISSIONS = {
-            Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.CAMERA,
             Manifest.permission.RECORD_AUDIO,
             Manifest.permission.INTERNET
@@ -64,28 +63,33 @@ public class CameraActivity extends BaseActivity {
             requestPermission(); //First Permission request
     }
     private void requestPermission() {
-        if (SDK_INT >= Build.VERSION_CODES.R) {
-            ActivityResultLauncher<Intent> startActivityIntent = registerForActivityResult(
-                    new ActivityResultContracts.StartActivityForResult(),
-                    result -> Log.d("CameraActivity", result.toString()));
-            try {
-                Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
-                intent.addCategory("android.intent.category.DEFAULT");
-                intent.setData(Uri.parse(String.format("package:%s",getApplicationContext().getPackageName())));
-                startActivityIntent.launch(intent);
+//        if (SDK_INT >= Build.VERSION_CODES.R) {
+//            ActivityResultLauncher<Intent> startActivityIntent = registerForActivityResult(
+//                    new ActivityResultContracts.StartActivityForResult(),
+//                    result -> Log.d("CameraActivity", result.toString()));
+//            try {
+//                Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
+//                intent.addCategory("android.intent.category.DEFAULT");
+//                intent.setData(Uri.parse(String.format("package:%s",getApplicationContext().getPackageName())));
+//                startActivityIntent.launch(intent);
 //                startActivityForResult(intent, 2296);
-            } catch (Exception e) {
-                Intent intent = new Intent();
-                intent.setAction(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
-                startActivityIntent.launch(intent);
-//                startActivityForResult(intent, 2296);
-            }
-        }
+//            } catch (Exception e) {
+//                Intent intent = new Intent();
+//                intent.setAction(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+//                startActivityIntent.launch(intent);
+////                startActivityForResult(intent, 2296);
+//            }
+//        }
         //below android 11
         requestPermissions(PERMISSIONS, CODE_REQUEST_PERMISSIONS);
     }
 
     private boolean hasAllPermissions() { //checks if permissions have already been granted
+        for (String permission : PERMISSIONS) {
+            if (checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
+                return false;
+            }
+        }
         return Arrays.stream(PERMISSIONS).allMatch(permission -> checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED);
     }
 

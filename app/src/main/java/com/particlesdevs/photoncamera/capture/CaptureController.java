@@ -1549,19 +1549,21 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             rebuildPreviewBuilder();*/
 
             IsoExpoSelector.useTripod = PhotonCamera.getGyro().getTripod();
-            long[] times = new long[frameCount];
-            for (int i = 0; i < frameCount; i++) {
-                IsoExpoSelector.setExpo(captureBuilder, i, this);
-                times[i] = IsoExpoSelector.lastSelectedExposure;
-                captures.add(captureBuilder.build());
-            }
+
             if (frameCount == -1) {
                 for (int i = 0; i < IsoExpoSelector.patternSize; i++) {
                     IsoExpoSelector.setExpo(captureBuilder, i, this);
                     captures.add(captureBuilder.build());
                 }
-            } else
+            } else {
+                long[] times = new long[frameCount];
+                for (int i = 0; i < frameCount; i++) {
+                    IsoExpoSelector.setExpo(captureBuilder, i, this);
+                    times[i] = IsoExpoSelector.lastSelectedExposure;
+                    captures.add(captureBuilder.build());
+                }
                 PhotonCamera.getGyro().PrepareGyroBurst(times, BurstShakiness);
+            }
             double frametime = ExposureIndex.time2sec(IsoExpoSelector.GenerateExpoPair(-1, this).exposure);
             //img
             Log.d(TAG, "FrameCount:" + frameCount);
